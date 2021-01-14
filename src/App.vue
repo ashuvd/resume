@@ -1,26 +1,71 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Welcome to Your Vue.js App" />
+  <div class="container column">
+    <AppAddBlock @add="addBlock" />
+    <AppContent :blocksCount="blocks.length">
+      <component
+        :key="i"
+        v-for="(block, i) in blocks"
+        :is="block.name"
+        :value="block.value"
+      />
+    </AppContent>
+  </div>
+  <div class="container">
+    <AppAddComment @load="fetchComments" />
+    <AppComments v-if="comments.length && !loading" :comments="comments" />
+    <AppLoader v-if="loading" />
+  </div>
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
+import AppLoader from './components/AppLoader';
+import AppAddBlock from './components/AppAddBlock';
+import AppContent from './components/AppContent';
+import AppComments from './components/AppComments';
+import AppAddComment from './components/AppAddComment';
+
+import BlockTitle from './components/blocks/BlockTitle';
+import BlockSubtitle from './components/blocks/BlockSubtitle';
+import BlockAvatar from './components/blocks/BlockAvatar';
+import BlockText from './components/blocks/BlockText';
 
 export default {
-  name: "App",
+  data() {
+    return {
+      blocks: [],
+      comments: [],
+      loading: false
+    };
+  },
+  methods: {
+    addBlock(action) {
+      this.blocks.push({
+        name: `block-${action.type}`,
+        value: action.payload
+      });
+    },
+    async fetchComments() {
+      this.loading = true;
+      const response = await fetch(
+        'https://jsonplaceholder.typicode.com/comments?_limit=42'
+      );
+      this.comments = await response.json();
+      console.log(this.comments)
+      this.loading = false;
+    }
+  },
   components: {
-    HelloWorld
+    AppLoader,
+    AppAddBlock,
+    AppContent,
+    AppComments,
+    BlockTitle,
+    BlockSubtitle,
+    BlockAvatar,
+    BlockText,
+    AppAddComment
   }
 };
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
+<style></style>
